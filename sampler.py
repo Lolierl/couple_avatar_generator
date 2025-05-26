@@ -1,6 +1,6 @@
 from share import *
 import config
-
+import os
 import cv2
 import einops
 import gradio as gr
@@ -19,7 +19,7 @@ import random
 import numpy as np
 import einops
 from torch import nn
-from PIL import Image
+from PIL import Image, ImageOps
 
 class ControlNetSampler:
     def __init__(self, model_config_path, model_checkpoint_path):
@@ -112,18 +112,57 @@ class ControlNetSampler:
             results = [x_samples[i] for i in range(num_samples)]
             
         return results[0]
+def process(image):
+    width, height = image.size
+    longest = max(width, height)
+    delta_w = longest - width
+    delta_h = longest - height
+    padding = (delta_w // 2, delta_h // 2, delta_w - (delta_w // 2), delta_h - (delta_h // 2))
+    square_image = ImageOps.expand(image, padding, fill=(0, 0, 0))
+    resized_image = square_image.resize((512, 512), Image.BICUBIC)
+    return resized_image
 
-sampler = ControlNetSampler('./models/cldm_v15.yaml', 'checkpoints/last.ckpt')
+sampler = ControlNetSampler('./models/cldm_v15.yaml', '/root/autodl-tmp/ControlNet/models/control_sd15_ini.ckpt')
 
-image_path = "training/fill50k/source/1.png"
-input_image = np.array(Image.open(image_path).convert('RGB'))
-prompt = "light coral circle with white background"
-result = sampler.process(
-    input_image, 
-    prompt, 
-    "high quality, detailed", 
-    "blurry, low quality", 
-    1, 512, 20, False, 1.0, 9.0, -1, 0.0
-)
-output_image = Image.fromarray(result)
-output_image.save("examples/output1.png") 
+input_dir = "/root/autodl-tmp/ControlNet/training/couple_avatar/female"
+output_dir = "raw_examples"
+os.makedirs(output_dir, exist_ok=True)
+
+# 获取前100张图片路径
+image_files = sorted([f for f in os.listdir(input_dir) if f.endswith(".jpeg")])[:10]
+
+for idx, filename in enumerate(image_files):
+    image_path = os.path.join(input_dir, filename)
+    raw_image = Image.open(image_path).convert('RGB')
+    
+    # 预处理输入图像
+    input_image = process(raw_image)  # process 函数应输出图像（如 torch tensor 或 numpy 数组）
+    input_image.save(os.path.join(output_dir, f"input_{idx:03d}.png"))
+    input_image = np.array(input_image)
+
+    # 设置提示词
+    prompt = "a male couple avatar of this image, 1 boy"
+    positive_prompt = "solo, cute, beautiful face, high quality, detailed, best quality, masterpiece"
+    negative_prompt = "blurry, low quality, twisted, ugly, deformed, distorted, bad anatomy, bad face, text, error, missing fingers, extra digit, fewer digits"
+    
+    # 调用采样器
+    result = sampler.process(
+        input_image, 
+        prompt, 
+        positive_prompt, 
+        negative_prompt, 
+        1, 512, 50, False, 0.9, 7.0, -1, 0.0   ###0.9, 9.0
+    )
+
+    # 将输出转换为图像并拼接
+    output_image = Image.fromarray(result)
+    output_image.save(os.path.join(output_dir, f"output_{idx:03d}.png"))
+    #concatenated = Image.new('RGB', (raw_image.width + output_image.width, raw_image.height))
+    #concatenated.paste(raw_image, (0, 0))
+    #concatenated.paste(output_image, (raw_image.width, 0))
+    
+    # 保存拼接图
+    #save_path = os.path.join(output_dir, f"output_{idx:03d}.png")
+    #concatenated.save(save_path)
+
+    #print(f"Processed {filename} -> {save_path}")

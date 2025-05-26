@@ -2,7 +2,7 @@ import einops
 import torch
 import torch as th
 import torch.nn as nn
-
+import os
 from ldm.modules.diffusionmodules.util import (
     conv_nd,
     linear,
@@ -433,3 +433,8 @@ class ControlLDM(LatentDiffusion):
             self.control_model = self.control_model.cpu()
             self.first_stage_model = self.first_stage_model.cuda()
             self.cond_stage_model = self.cond_stage_model.cuda()
+    def on_train_epoch_end(self):
+        ckpt_path = "./checkpoints/last.ckpt"
+        os.makedirs(os.path.dirname(ckpt_path), exist_ok=True)
+        self.trainer.save_checkpoint(ckpt_path)
+        print(f"[INFO] Saved checkpoint to {ckpt_path}")

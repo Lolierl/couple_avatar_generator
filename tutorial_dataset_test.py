@@ -1,9 +1,9 @@
 from tutorial_dataset import MyDataset
-
-dataset = MyDataset()
+import os
+dataset = MyDataset('training/couple_avatar')
 print(len(dataset))
 
-item = dataset[1234]
+item = dataset[12]
 jpg = item['jpg']
 txt = item['txt']
 hint = item['hint']

@@ -1,6 +1,6 @@
 .idea/
 
-training/
+training/fill50k
 lightning_logs/
 image_log/
 
@@ -8,7 +8,7 @@ image_log/
 *.pt
 *.ckpt
 *.safetensors
-
+*.tar.gz
 gradio_pose2image_private.py
 gradio_canny2image_private.py
 
