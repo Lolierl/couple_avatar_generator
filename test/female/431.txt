@@ -1,0 +1,1 @@
+male, human, facing forward, top left of the image, grayscale background, smiling, dark hair, wearing jacket.

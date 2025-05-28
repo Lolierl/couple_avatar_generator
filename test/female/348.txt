@@ -1,0 +1,1 @@
+male, human, facing right, center of the image, blue background, yellow hair, wearing white shirt.

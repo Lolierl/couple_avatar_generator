@@ -1,0 +1,1 @@
+male, human, face right, center of the image, white background, blond hair, glasses, scarf.

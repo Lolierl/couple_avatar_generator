@@ -1,0 +1,1 @@
+male, human, face right, upper right of the image, fleshcolor background, black hair, glasses.

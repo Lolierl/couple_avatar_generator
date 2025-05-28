@@ -1,0 +1,1 @@
+female, human, facing left, center of the image, gray background, brown hair, angry expression, white shirt.

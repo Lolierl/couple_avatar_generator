@@ -1,0 +1,1 @@
+female, human, facing left, center of the image, mask, grey background, black hoodie, white hair.

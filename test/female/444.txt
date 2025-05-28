@@ -1,0 +1,1 @@
+male, human, facing right, center of the image, white background, black hair, closed eyes.

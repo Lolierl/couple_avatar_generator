@@ -1,0 +1,1 @@
+male, humanoid, facing right, center of the image, light pink background, blonde hair, blue eyes, cat ears.

@@ -1,0 +1,1 @@
+male, human, facing right, center of the image, dark background, white hair, blue shirt, baseball cap.

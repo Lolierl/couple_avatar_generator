@@ -1,0 +1,1 @@
+female, human, facing left, center of the image, grey background, grey hair, grey suit, red tie, earrings.
