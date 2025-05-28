@@ -122,9 +122,9 @@ def process(image):
     resized_image = square_image.resize((512, 512), Image.BICUBIC)
     return resized_image
 
-sampler = ControlNetSampler('./models/cldm_v15.yaml', '/root/autodl-tmp/ControlNet/models/control_sd15_ini.ckpt')
+sampler = ControlNetSampler('./models/cldm_v15.yaml', '/root/autodl-tmp/ControlNet/checkpoints/last.ckpt')
 
-input_dir = "/root/autodl-tmp/ControlNet/training/couple_avatar/female"
+input_dir = "/root/autodl-tmp/ControlNet/test"
 output_dir = "raw_examples"
 os.makedirs(output_dir, exist_ok=True)
 
@@ -138,10 +138,14 @@ for idx, filename in enumerate(image_files):
     # 预处理输入图像
     input_image = process(raw_image)  # process 函数应输出图像（如 torch tensor 或 numpy 数组）
     input_image.save(os.path.join(output_dir, f"input_{idx:03d}.png"))
-    input_image = np.array(input_image)
+    
+    flipped_image = ImageOps.mirror(input_image)
+    flipped_image.save(os.path.join(output_dir, f"input_flipped_{idx:03d}.png"))
+
+    input_image = np.array(flipped_image)
 
     # 设置提示词
-    prompt = "a male couple avatar of this image, 1 boy"
+    prompt = "female, human, face right, side profile, fox ears, long hair, blonde hair, school uniform, yellow ribbon, surprised expression, white background"
     positive_prompt = "solo, cute, beautiful face, high quality, detailed, best quality, masterpiece"
     negative_prompt = "blurry, low quality, twisted, ugly, deformed, distorted, bad anatomy, bad face, text, error, missing fingers, extra digit, fewer digits"
     
@@ -151,7 +155,7 @@ for idx, filename in enumerate(image_files):
         prompt, 
         positive_prompt, 
         negative_prompt, 
-        1, 512, 50, False, 0.9, 7.0, -1, 0.0   ###0.9, 9.0
+        1, 512, 50, False, 0.7, 15.0, -1, 0.0   ###0.9, 9.0
     )
 
     # 将输出转换为图像并拼接

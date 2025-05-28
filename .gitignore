@@ -11,7 +11,7 @@ image_log/
 *.tar.gz
 gradio_pose2image_private.py
 gradio_canny2image_private.py
-
+nohup.out
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -141,3 +141,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
