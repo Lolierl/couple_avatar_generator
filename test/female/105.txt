@@ -1,1 +1,0 @@
-male, human, facing left, center of the image, white background, orange hair, blue eyes.

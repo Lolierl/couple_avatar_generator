@@ -1,1 +1,0 @@
-male, human, facingright, center of the image, white background, purple hair, blue eyes, hoodie.

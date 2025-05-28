@@ -1,1 +1,0 @@
-male, human, face left, center of the image, white background, short hair, black eyes.

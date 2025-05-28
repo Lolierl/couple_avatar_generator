@@ -1,1 +1,0 @@
-male, human, facing right, standing, brown hair, holding object, wearing casual clothing, outdoor setting, daylight.

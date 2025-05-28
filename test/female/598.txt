@@ -1,1 +1,0 @@
-male, human, facing left, center of the image, grey background, brown hair, brown eyes, neutral expression.

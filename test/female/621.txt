@@ -1,1 +1,0 @@
-male, human, facing forward, center of the image, grayscale, embracing, short hair.
