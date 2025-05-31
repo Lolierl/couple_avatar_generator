@@ -112,15 +112,20 @@ class ControlNetSampler:
             results = [x_samples[i] for i in range(num_samples)]
             
         return results[0]
-def process(image):
-    width, height = image.size
-    longest = max(width, height)
-    delta_w = longest - width
-    delta_h = longest - height
-    padding = (delta_w // 2, delta_h // 2, delta_w - (delta_w // 2), delta_h - (delta_h // 2))
-    square_image = ImageOps.expand(image, padding, fill=(0, 0, 0))
-    resized_image = square_image.resize((512, 512), Image.BICUBIC)
-    return resized_image
+def process(image_array, flip):
+    h, w, _ = image_array.shape
+    longest = max(h, w)
+    delta_w = longest - w
+    delta_h = longest - h
+    top = delta_h // 2
+    bottom = delta_h - top
+    left = delta_w // 2
+    right = delta_w - left
+    padded = cv2.copyMakeBorder(image_array, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(255, 255, 255))    
+    if flip:
+        padded = cv2.flip(padded, 1)
+    resized = cv2.resize(padded, (512, 512), interpolation=cv2.INTER_CUBIC)
+    return resized
 
 sampler = ControlNetSampler('./models/cldm_v15.yaml', '/root/autodl-tmp/ControlNet/checkpoints/last.ckpt')
 
@@ -160,13 +165,13 @@ for idx, filename in enumerate(image_files):
 
     # 将输出转换为图像并拼接
     output_image = Image.fromarray(result)
-    output_image.save(os.path.join(output_dir, f"output_{idx:03d}.png"))
-    #concatenated = Image.new('RGB', (raw_image.width + output_image.width, raw_image.height))
-    #concatenated.paste(raw_image, (0, 0))
-    #concatenated.paste(output_image, (raw_image.width, 0))
+    #output_image.save(os.path.join(output_dir, f"output_{idx:03d}.png"))
+    concatenated = Image.new('RGB', (raw_image.width + output_image.width, raw_image.height))
+    concatenated.paste(raw_image, (0, 0))
+    concatenated.paste(output_image, (raw_image.width, 0))
     
     # 保存拼接图
-    #save_path = os.path.join(output_dir, f"output_{idx:03d}.png")
-    #concatenated.save(save_path)
+    save_path = os.path.join(output_dir, f"output_{idx:03d}.png")
+    concatenated.save(save_path)
 
-    #print(f"Processed {filename} -> {save_path}")
+    print(f"Processed {filename} -> {save_path}")
