@@ -9,6 +9,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 # Configs
 resume_path = '/root/autodl-tmp/ControlNet/models/control_sd15_ini.ckpt'
+checkpoint_path = '/root/autodl-tmp/ControlNet/checkpoints/last.ckpt'
 batch_size = 1
 logger_freq = 2000
 learning_rate = 1e-5
@@ -23,10 +24,20 @@ model.sd_locked = sd_locked
 model.only_mid_control = only_mid_control
 
 # Misc
-dataset = MyDataset(dataset_path='training/couple_avatar')
-dataloader = DataLoader(dataset, num_workers=4, batch_size=batch_size, shuffle=True)
+dataset = MyDataset(dataset_path='test')
+print("Dataset size:", len(dataset))
+dataloader = DataLoader(dataset, num_workers=16, batch_size=batch_size, shuffle=True)
 logger = ImageLogger(batch_frequency=logger_freq)
-trainer = pl.Trainer(gpus=2, precision=16, callbacks=[logger], strategy='ddp', accumulate_grad_batches=4, max_epochs=500, enable_checkpointing=False )
+
+checkpoint_callback = ModelCheckpoint(
+    dirpath="checkpoints",
+    filename="{epoch:02d}",
+    save_top_k=0,  
+    save_last=True, 
+    every_n_train_steps=1000
+)
+
+trainer = pl.Trainer(gpus=4, precision=16, callbacks=[logger,  checkpoint_callback], strategy='ddp', accumulate_grad_batches=16, max_epochs=500, enable_checkpointing=True, resume_from_checkpoint=checkpoint_path if os.path.exists(checkpoint_path) else None)
 
 # Train!
 trainer.fit(model, dataloader)

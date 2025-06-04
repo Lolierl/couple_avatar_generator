@@ -1,7 +1,16 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 # 修复 MKL 线程层冲突
 os.environ['MKL_THREADING_LAYER'] = 'GNU'
 
+# 直接设置API配置
+openai_api_key = "sk-dahw6xzrbtarbh4w"
+
+openai_base_url = "https://cloud.infini-ai.com/maas/v1"
+
+print("OpenAI API Key:", openai_api_key)
+print("OpenAI Base URL:", openai_base_url)
 # 先导入 numpy 避免冲突
 import numpy as np
 
@@ -10,8 +19,8 @@ from PIL import Image
 # 1. 生成prompt
 from get_gpt4_prompt import get_prompt
 
-def generate_prompt(image_path):
-    prompt_obj = get_prompt(image_path)
+def generate_prompt(image_path, openai_api_key, openai_base_url):
+    prompt_obj = get_prompt(image_path, openai_api_key, openai_base_url)
     # 你可能需要根据实际返回结构调整
     return prompt_obj.message.content if hasattr(prompt_obj, "message") else prompt_obj
 
@@ -21,10 +30,12 @@ def run_sampler(input_image, prompt, output_path):
     from sampler import ControlNetSampler, process
     # 路径根据你实际模型和配置调整
     model_config = './models/cldm_v15.yaml'
-    model_ckpt = './checkpoints/last.ckpt'  # 使用相对路径
+    model_ckpt = 'checkpoints/last.ckpt'  
+    print("加载”）"
     sampler = ControlNetSampler(model_config, model_ckpt)
     # 预处理
     img = Image.open(input_image).convert('RGB')
+    print("原始图片大小:", img.size)
     img = np.array(process(np.array(img), flip=True))  # 你可以根据需要调整flip
     # prompt参数
     a_prompt = "solo, cute, beautiful face, high quality, detailed, best quality, masterpiece"
@@ -136,7 +147,7 @@ if __name__ == "__main__":
     
     # 1. 生成prompt（描述配对头像）
     print("\n步骤1: 生成配对头像的描述...")
-    prompt = generate_prompt(input_image)
+    prompt = generate_prompt(input_image, openai_api_key, openai_base_url)
     print("生成的prompt:", prompt)
     
     # 2. 使用 ControlNet 生成配对头像

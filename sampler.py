@@ -127,51 +127,62 @@ def process(image_array, flip):
     resized = cv2.resize(padded, (512, 512), interpolation=cv2.INTER_CUBIC)
     return resized
 
-sampler = ControlNetSampler('./models/cldm_v15.yaml', '/root/autodl-tmp/ControlNet/checkpoints/last.ckpt')
+if __name__ == "__main__":
+    sampler = ControlNetSampler('./models/cldm_v15.yaml', '/root/autodl-tmp/ControlNet/checkpoints/last.ckpt')
 
-input_dir = "/root/autodl-tmp/ControlNet/test"
-output_dir = "raw_examples"
-os.makedirs(output_dir, exist_ok=True)
+    input_dir = "/root/autodl-tmp/ControlNet/test"
+    output_dir = "raw_examples"
+    os.makedirs(output_dir, exist_ok=True)
+    import os
+    import json
+    from PIL import Image
+    import numpy as np
 
-# 获取前100张图片路径
-image_files = sorted([f for f in os.listdir(input_dir) if f.endswith(".jpeg")])[:10]
+    # 加载 prompt.json
+    json_path = "/root/autodl-tmp/ControlNet/test/prompt.json"
+    with open(json_path, 'r') as f:
+        prompt_data = json.load(f)
 
-for idx, filename in enumerate(image_files):
-    image_path = os.path.join(input_dir, filename)
-    raw_image = Image.open(image_path).convert('RGB')
-    
-    # 预处理输入图像
-    input_image = process(raw_image)  # process 函数应输出图像（如 torch tensor 或 numpy 数组）
-    input_image.save(os.path.join(output_dir, f"input_{idx:03d}.png"))
-    
-    flipped_image = ImageOps.mirror(input_image)
-    flipped_image.save(os.path.join(output_dir, f"input_flipped_{idx:03d}.png"))
+    # 设置目录
+    base_dir = os.path.dirname(json_path)
+    output_dir = "/root/autodl-tmp/ControlNet/results"
+    input_save_dir = os.path.join(output_dir, "inputs")
+    output_save_dir = os.path.join(output_dir, "outputs")
 
-    input_image = np.array(flipped_image)
+    os.makedirs(input_save_dir, exist_ok=True)
+    os.makedirs(output_save_dir, exist_ok=True)
 
-    # 设置提示词
-    prompt = "female, human, face right, side profile, fox ears, long hair, blonde hair, school uniform, yellow ribbon, surprised expression, white background"
-    positive_prompt = "solo, cute, beautiful face, high quality, detailed, best quality, masterpiece"
-    negative_prompt = "blurry, low quality, twisted, ugly, deformed, distorted, bad anatomy, bad face, text, error, missing fingers, extra digit, fewer digits"
-    
-    # 调用采样器
-    result = sampler.process(
-        input_image, 
-        prompt, 
-        positive_prompt, 
-        negative_prompt, 
-        1, 512, 50, False, 0.7, 15.0, -1, 0.0   ###0.9, 9.0
-    )
+    # 处理前 100 条
+    for idx, item in enumerate(prompt_data[:100]):
+        source_path = os.path.join(base_dir, item["source"])
+        prompt = item["prompt"]
+        print(f"Processing {source_path}...")
 
-    # 将输出转换为图像并拼接
-    output_image = Image.fromarray(result)
-    #output_image.save(os.path.join(output_dir, f"output_{idx:03d}.png"))
-    concatenated = Image.new('RGB', (raw_image.width + output_image.width, raw_image.height))
-    concatenated.paste(raw_image, (0, 0))
-    concatenated.paste(output_image, (raw_image.width, 0))
-    
-    # 保存拼接图
-    save_path = os.path.join(output_dir, f"output_{idx:03d}.png")
-    concatenated.save(save_path)
+        # 打开源图像
+        raw_image = Image.open(source_path).convert('RGB')
+        raw_image_np = np.array(raw_image)
 
-    print(f"Processed {filename} -> {save_path}")
+        condition_image = process(raw_image_np, flip = True)  
+
+        # 设置提示词
+        positive_prompt = "solo, cute, beautiful face, high quality, detailed, best quality, masterpiece"
+        negative_prompt = "blurry, low quality, twisted, ugly, deformed, distorted, bad anatomy, bad face, text, error, missing fingers, extra digit, fewer digits"
+
+        # 调用采样器
+        result = sampler.process(
+            condition_image,  # 条件图像
+            prompt,
+            positive_prompt,
+            negative_prompt,
+            1, 512, 50, False, 0.9, 11.0, -1, 0.0
+        )
+
+        output_image = Image.fromarray(result)
+
+        input_save_path = os.path.join(input_save_dir, f"input_{idx:03d}.png")
+        output_save_path = os.path.join(output_save_dir, f"output_{idx:03d}.png")
+        
+        raw_image.save(input_save_path)
+        output_image.save(output_save_path)
+
+        print(f"Saved: {input_save_path} and {output_save_path}")
