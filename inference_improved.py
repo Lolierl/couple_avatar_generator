@@ -4,13 +4,8 @@ load_dotenv()
 # 修复 MKL 线程层冲突
 os.environ['MKL_THREADING_LAYER'] = 'GNU'
 
-# 直接设置API配置
-openai_api_key = "sk-dahw6xzrbtarbh4w"
-
-openai_base_url = "https://cloud.infini-ai.com/maas/v1"
-
-print("OpenAI API Key:", openai_api_key)
-print("OpenAI Base URL:", openai_base_url)
+openai_api_key = os.environ.get("INFINI_API_KEY")
+openai_base_url = os.environ.get("INFINI_BASE_URL")
 # 先导入 numpy 避免冲突
 import numpy as np
 
@@ -31,7 +26,6 @@ def run_sampler(input_image, prompt, output_path):
     # 路径根据你实际模型和配置调整
     model_config = './models/cldm_v15.yaml'
     model_ckpt = 'checkpoints/last.ckpt'  
-    print("加载”）"
     sampler = ControlNetSampler(model_config, model_ckpt)
     # 预处理
     img = Image.open(input_image).convert('RGB')
