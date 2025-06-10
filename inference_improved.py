@@ -3,10 +3,11 @@ from dotenv import load_dotenv
 load_dotenv()
 # 修复 MKL 线程层冲突
 os.environ['MKL_THREADING_LAYER'] = 'GNU'
+openai_api_key = os.getenv("INFINI_API_KEY")
+openai_base_url = os.getenv("INFINI_BASE_URL")
+print("OpenAI API Key:", openai_api_key)
+print("OpenAI Base URL:", openai_base_url)
 
-openai_api_key = os.environ.get("INFINI_API_KEY")
-openai_base_url = os.environ.get("INFINI_BASE_URL")
-# 先导入 numpy 避免冲突
 import numpy as np
 
 from PIL import Image
@@ -21,15 +22,12 @@ def generate_prompt(image_path, openai_api_key, openai_base_url):
 
 # 2. 调用sampler生成B
 def run_sampler(input_image, prompt, output_path):
-    # 这里假设sampler.py支持import调用
     from sampler import ControlNetSampler, process
-    # 路径根据你实际模型和配置调整
     model_config = './models/cldm_v15.yaml'
-    model_ckpt = 'checkpoints/last.ckpt'  
+    model_ckpt = 'checkpoints/last.ckpt'
     sampler = ControlNetSampler(model_config, model_ckpt)
     # 预处理
     img = Image.open(input_image).convert('RGB')
-    print("原始图片大小:", img.size)
     img = np.array(process(np.array(img), flip=True))  # 你可以根据需要调整flip
     # prompt参数
     a_prompt = "solo, cute, beautiful face, high quality, detailed, best quality, masterpiece"
@@ -122,7 +120,7 @@ def run_adain(content_path, style_path, output_path, alpha=1.0,
 
 if __name__ == "__main__":
     # 输入图片路径（比如一张女性头像）
-    input_image = "./test/female/0.png"
+    input_image = "/root/autodl-tmp/ControlNet/test/male/630.png"
     
     # 可调参数
     alpha = 0.7  # 风格化程度：0.0-1.0，建议0.6-0.8
@@ -142,6 +140,7 @@ if __name__ == "__main__":
     # 1. 生成prompt（描述配对头像）
     print("\n步骤1: 生成配对头像的描述...")
     prompt = generate_prompt(input_image, openai_api_key, openai_base_url)
+    #prompt = "female, human, facing right, center of the image, white background, pick hair, pink eyes."
     print("生成的prompt:", prompt)
     
     # 2. 使用 ControlNet 生成配对头像

@@ -1,0 +1,4 @@
+上传一张头像,风格化程度 (alpha),风格迁移后的最终图片,flag,username,timestamp
+flagged/上传一张头像/993b2fe1853cb6ecd4d0/dog.jpg,0.7,flagged/风格迁移后的最终图片/3f76b5b40631413a0e79/image.webp,,,2025-06-04 15:32:51.005826
+flagged/上传一张头像/f0a2498e14e97d828542/test.jpg,,0.7,flagged/你的情侣头像/07667cb03a1f27881feb/image.webp,,,2025-06-04 17:55:21.633762
+flagged/上传一张头像/72d49c6f44e57ec61d19/IMG_8708.jpeg,,0.7,15,0.7,flagged/你的情侣头像/de266026af11f3939277/image.webp,,,2025-06-05 12:21:28.960566
